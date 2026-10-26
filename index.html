@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Cajón de visitas · Cumbres Revival</title>
+<style>
+  :root{
+    --bg:#f3f5f8; --card:#ffffff; --ink:#18212d; --muted:#667386; --line:#e2e7ee;
+    --brand:#1f6feb; --brand-ink:#ffffff; --ok:#237a3b; --ok-bg:#e6f4ea;
+    --warn:#b4470c; --warn-bg:#fff1e6; --err:#b3261e; --err-bg:#fdeceb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#10151c; --card:#19212b; --ink:#e8edf3; --muted:#93a0b2; --line:#2a3441;
+      --brand:#4c8dff; --brand-ink:#08111f; --ok:#6fd08c; --ok-bg:#16301f;
+      --warn:#ffa564; --warn-bg:#3a2314; --err:#ff8b84; --err-bg:#3b1a18;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  main{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+  h1{font-size:20px;margin:8px 0 2px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  .card h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+  .card.destacado{border-color:var(--warn);box-shadow:0 0 0 3px var(--warn-bg)}
+  .depto{font-size:28px;font-weight:700;margin:0 0 4px}
+  .fila{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line)}
+  .fila:first-of-type{border-top:0}
+  .fila span:first-child{color:var(--muted)}
+  .fila span:last-child{font-weight:600;text-align:right}
+  .vacio{color:var(--muted);margin:0}
+  .hace{display:inline-block;margin-top:10px;font-size:14px;color:var(--muted)}
+  button,.btn{font:inherit;font-weight:600;border:0;border-radius:12px;padding:14px 16px;cursor:pointer;
+    width:100%;display:block;text-align:center;text-decoration:none}
+  .primario{background:var(--brand);color:var(--brand-ink)}
+  .salir{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn)}
+  .sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button:disabled{opacity:.6;cursor:default}
+  .acciones{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .aviso{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:var(--warn-bg);color:var(--warn);font-size:14px}
+  label{display:block;font-size:14px;font-weight:600;margin:12px 0 4px}
+  input{font:inherit;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+  input:focus{outline:2px solid var(--brand);outline-offset:1px}
+  .ayuda{font-size:13px;color:var(--muted);margin:4px 0 0}
+  .msg{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:14px}
+  .msg.ok{background:var(--ok-bg);color:var(--ok)}
+  .msg.err{background:var(--err-bg);color:var(--err)}
+  .oculto{display:none}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Cajón de visitas</h1>
+  <p class="sub">Cumbres Revival · solo para residentes</p>
+
+  <button id="btnSalir" class="salir" type="button">🚗 Mi visita quiere salir</button>
+  <div style="height:14px"></div>
+
+  <section id="tarjeta" class="card" aria-live="polite">
+    <h2>Último carro registrado (el de atrás)</h2>
+    <div id="contenido"><p class="vacio">Cargando…</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Registrar visita</h2>
+    <p class="ayuda" style="margin-top:0">Registra el carro que se estaciona <strong>atrás</strong>, el que puede bloquear al de adelante.</p>
+    <form id="form" autocomplete="off">
+      <label for="depto">Departamento que visitan</label>
+      <input id="depto" name="depto" maxlength="20" required placeholder="Ej. 304">
+
+      <label for="tel">Tu teléfono (para avisarte si bloquean a alguien)</label>
+      <input id="tel" name="tel" type="tel" inputmode="tel" maxlength="20" required placeholder="10 dígitos">
+
+      <label for="carro">Carro (marca y modelo)</label>
+      <input id="carro" name="carro" maxlength="40" required placeholder="Ej. Nissan Versa">
+
+      <label for="color">Color</label>
+      <input id="color" name="color" maxlength="25" required placeholder="Ej. Gris" list="colores">
+      <datalist id="colores">
+        <option value="Blanco"><option value="Negro"><option value="Gris"><option value="Plata">
+        <option value="Rojo"><option value="Azul"><option value="Verde"><option value="Beige">
+        <option value="Naranja"><option value="Amarillo"><option value="Café"><option value="Vino">
+      </datalist>
+
+      <div style="height:16px"></div>
+      <button id="btnEnviar" class="primario" type="submit">Registrar visita</button>
+      <div id="msgForm" class="msg oculto" role="status"></div>
+    </form>
+  </section>
+
+  <footer>Al registrar, la hora de llegada se guarda automáticamente.</footer>
+</main>
+
+<script>
+"use strict";
+
+// ====== CONFIGURACIÓN ======
+const CONFIG = {
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzvHG02JpUcg1_Yhn0A8_dV6eSVP9GmPouozzo7Fuxh0kljwQKxXe59hHKpeLI_5tzZyg/exec",
+  REFRESCO_SEG: 30
+};
+// ===========================
+
+const $ = (id) => document.getElementById(id);
+let ultimo = null;        // último registro conocido
+let modoSalida = false;   // true después de tocar "Mi visita quiere salir"
+
+function configurado() {
+  return CONFIG.APPS_SCRIPT_URL && CONFIG.APPS_SCRIPT_URL.indexOf("TU_APPS_SCRIPT") === -1;
+}
+
+function guardarLocal(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function leerLocal(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+
+function haceCuanto(ms) {
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return "hace unos segundos";
+  if (min < 60) return "hace " + min + " min";
+  const h = Math.floor(min / 60), m = min % 60;
+  if (h < 24) return "hace " + h + " h" + (m ? " " + m + " min" : "");
+  const d = Math.floor(h / 24);
+  return "hace " + d + (d === 1 ? " día" : " días");
+}
+
+function textoHora(fecha) {
+  const hoy = new Date();
+  const ayer = new Date(Date.now() - 86400000);
+  const hh = fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
+  if (fecha.toDateString() === hoy.toDateString()) return "Hoy " + hh;
+  if (fecha.toDateString() === ayer.toDateString()) return "Ayer " + hh;
+  return fecha.toLocaleDateString("es-MX", { day: "2-digit", month: "short" }) + " " + hh;
+}
+
+function fila(etiqueta, valor) {
+  const d = document.createElement("div");
+  d.className = "fila";
+  const a = document.createElement("span"); a.textContent = etiqueta;
+  const b = document.createElement("span"); b.textContent = valor;
+  d.append(a, b);
+  return d;
+}
+
+function telWhatsapp(tel) {
+  const digitos = String(tel).replace(/\D/g, "");
+  return digitos.length === 10 ? "52" + digitos : digitos;
+}
+
+function render() {
+  const cont = $("contenido");
+  cont.replaceChildren();
+  $("tarjeta").classList.toggle("destacado", modoSalida && !!ultimo);
+
+  if (!ultimo) {
+    const p = document.createElement("p");
+    p.className = "vacio";
+    p.textContent = "No hay ningún carro registrado en este momento.";
+    cont.append(p);
+    return;
+  }
+
+  const llegada = new Date(ultimo.hora);
+  const dep = document.createElement("p");
+  dep.className = "depto";
+  dep.textContent = "Depto " + ultimo.depto;
+  cont.append(dep);
+
+  const tel = document.createElement("div");
+  tel.className = "fila";
+  const t1 = document.createElement("span"); t1.textContent = "Teléfono";
+  const t2 = document.createElement("span");
+  const enlace = document.createElement("a");
+  enlace.href = "tel:" + ultimo.tel.replace(/\D/g, "");
+  enlace.textContent = ultimo.tel;
+  enlace.style.color = "inherit";
+  t2.append(enlace);
+  tel.append(t1, t2);
+  cont.append(tel);
+
+  cont.append(fila("Carro", ultimo.carro));
+  cont.append(fila("Color", ultimo.color));
+  cont.append(fila("Llegó", textoHora(llegada)));
+
+  const hace = document.createElement("span");
+  hace.className = "hace";
+  hace.textContent = haceCuanto(Date.now() - llegada.getTime());
+  cont.append(hace);
+
+  if (modoSalida) {
+    const acc = document.createElement("div");
+    acc.className = "acciones";
+    const llamar = document.createElement("a");
+    llamar.className = "btn primario";
+    llamar.href = "tel:" + ultimo.tel.replace(/\D/g, "");
+    llamar.textContent = "📞 Llamar";
+    const wa = document.createElement("a");
+    wa.className = "btn sec";
+    wa.href = "https://wa.me/" + telWhatsapp(ultimo.tel);
+    wa.target = "_blank";
+    wa.rel = "noopener";
+    wa.textContent = "💬 WhatsApp";
+    acc.append(llamar, wa);
+    cont.append(acc);
+
+    const aviso = document.createElement("p");
+    aviso.className = "aviso";
+    aviso.textContent = "Avisa o toca el timbre del depto " + ultimo.depto + ". Si el carro o el color no coincide con el que está atrás, nadie lo registró.";
+    cont.append(aviso);
+  }
+
+  // Opcional: quien se acuerde puede limpiar el registro cuando su visita se va
+  const btnFue = document.createElement("button");
+  btnFue.type = "button";
+  btnFue.className = "sec";
+  btnFue.style.marginTop = "12px";
+  btnFue.textContent = "✅ Mi visita ya se fue (opcional)";
+  btnFue.addEventListener("click", marcarSalida);
+  cont.append(btnFue);
+}
+
+async function marcarSalida() {
+  if (!ultimo) return;
+  const ok = confirm("¿Confirmas que el carro del depto " + ultimo.depto + " ya se fue? Dejará de mostrarse a los vecinos.");
+  if (!ok) return;
+  try {
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ accion: "salio" })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "No se pudo actualizar.");
+    ultimo = null;
+    modoSalida = false;
+    render();
+  } catch (e) {
+    alert("No se pudo marcar la salida: " + (e.message || e));
+  }
+}
+
+async function cargar() {
+  if (!configurado()) {
+    $("contenido").replaceChildren();
+    const p = document.createElement("p");
+    p.className = "vacio";
+    p.textContent = "Falta configurar la URL del Apps Script en la página.";
+    $("contenido").append(p);
+    return;
+  }
+  try {
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Error");
+    ultimo = data.registro;
+    render();
+  } catch (e) {
+    $("contenido").replaceChildren();
+    const p = document.createElement("p");
+    p.className = "vacio";
+    p.textContent = "No se pudo cargar. Revisa tu conexión e intenta de nuevo.";
+    $("contenido").append(p);
+  }
+}
+
+function mostrarMsg(texto, tipo) {
+  const m = $("msgForm");
+  m.textContent = texto;
+  m.className = "msg " + tipo;
+}
+
+$("btnSalir").addEventListener("click", async () => {
+  modoSalida = true;
+  await cargar();
+  $("tarjeta").scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+$("form").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  if (!configurado()) { mostrarMsg("Falta configurar la URL del Apps Script.", "err"); return; }
+
+  const datos = {
+    depto: $("depto").value.trim(),
+    tel: $("tel").value.trim(),
+    carro: $("carro").value.trim(),
+    color: $("color").value.trim()
+  };
+  if (datos.tel.replace(/\D/g, "").length < 10) {
+    mostrarMsg("El teléfono debe tener al menos 10 dígitos.", "err");
+    return;
+  }
+
+  const btn = $("btnEnviar");
+  btn.disabled = true;
+  btn.textContent = "Registrando…";
+  try {
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(datos)
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "No se pudo registrar.");
+
+    guardarLocal("depto", datos.depto);
+    guardarLocal("tel", datos.tel);
+    ultimo = data.registro;
+    modoSalida = false;
+    render();
+    $("carro").value = "";
+    $("color").value = "";
+    mostrarMsg("Listo, visita registrada. Ya se ve arriba como último carro.", "ok");
+  } catch (e) {
+    mostrarMsg(String(e.message || e), "err");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Registrar visita";
+  }
+});
+
+// Prellenar depto y teléfono del residente (se guardan solo en su celular)
+$("depto").value = leerLocal("depto");
+$("tel").value = leerLocal("tel");
+
+cargar();
+setInterval(() => { if (!document.hidden) cargar(); }, CONFIG.REFRESCO_SEG * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) cargar(); });
+</script>
+</body>
+</html>
